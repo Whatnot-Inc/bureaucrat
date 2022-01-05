@@ -60,7 +60,7 @@ defmodule Bureaucrat.MarkdownWriter do
 
   defp write_action(action, controller, records, file) do
     anchor = to_anchor(controller, action)
-    puts(file, "### <a id=#{anchor}></a>#{action}")
+    puts(file, "### #{action}")
     Enum.each(records, &write_example(&1, file))
   end
 
@@ -84,6 +84,21 @@ defmodule Bureaucrat.MarkdownWriter do
     |> puts("#### Message")
     |> puts("* __Topic:__ #{topic}")
     |> puts("* __Event:__ #{event}")
+
+    if payload != %{} do
+      file
+      |> puts("* __Body:__")
+      |> puts("```json")
+      |> puts("#{format_body_params(payload)}")
+      |> puts("```")
+    end
+  end
+
+  defp write_example({%{"topic" => topic, "payload" => payload, "event" => event}, _}, file) do
+    file
+    |> puts("#### Message")
+    |> puts("* __Topic:__ `#{topic}`")
+    |> puts("* __Event:__ `#{event}`")
 
     if payload != %{} do
       file
@@ -185,7 +200,7 @@ defmodule Bureaucrat.MarkdownWriter do
   end
 
   def format_body_params(params) do
-    {:ok, json} = JSON.encode(params, pretty: true)
+    {:ok, json} = JSON.encode(params, pretty: true, indent: 4)
     json
   end
 
@@ -195,7 +210,7 @@ defmodule Bureaucrat.MarkdownWriter do
 
   defp format_resp_body(string) do
     {:ok, struct} = JSON.decode(string)
-    {:ok, json} = JSON.encode(struct, pretty: true)
+    {:ok, json} = JSON.encode(struct, pretty: true, indent: 4)
     json
   end
 

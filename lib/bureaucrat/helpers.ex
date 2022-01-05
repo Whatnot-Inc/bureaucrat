@@ -20,7 +20,14 @@ defmodule Bureaucrat.Helpers do
   defmacro doc_push(socket, event) do
     quote bind_quoted: [socket: socket, event: event] do
       ref = make_ref()
-      message = %Message{event: event, topic: socket.topic, ref: ref, payload: Phoenix.ChannelTest.__stringify__(%{})}
+
+      message = %Message{
+        event: event,
+        topic: socket.topic,
+        ref: ref,
+        payload: Phoenix.ChannelTest.__stringify__(%{})
+      }
+
       doc(message, [])
       send(socket.channel_pid, message)
       ref
@@ -30,7 +37,14 @@ defmodule Bureaucrat.Helpers do
   defmacro doc_push(socket, event, payload) do
     quote bind_quoted: [socket: socket, event: event, payload: payload] do
       ref = make_ref()
-      message = %Message{event: event, topic: socket.topic, ref: ref, payload: Phoenix.ChannelTest.__stringify__(payload)}
+
+      message = %Message{
+        event: event,
+        topic: socket.topic,
+        ref: ref,
+        payload: Phoenix.ChannelTest.__stringify__(payload)
+      }
+
       doc(message, [])
       send(socket.channel_pid, message)
       ref
@@ -109,6 +123,8 @@ defmodule Bureaucrat.Helpers do
 
   def format_test_name("test " <> name), do: name
 
+  def format_test_name(name), do: name
+
   def group_title_for(_mod, []), do: nil
 
   def group_title_for(mod, [{other, path} | paths]) do
@@ -131,6 +147,14 @@ defmodule Bureaucrat.Helpers do
   end
 
   def get_default_operation_id(%Broadcast{topic: topic, event: event}) do
+    "#{topic}.#{event}"
+  end
+
+  def get_default_operation_id(%{topic: topic, event: event}) do
+    "#{topic}.#{event}"
+  end
+
+  def get_default_operation_id(%{"topic" => topic, "event" => event}) do
     "#{topic}.#{event}"
   end
 
